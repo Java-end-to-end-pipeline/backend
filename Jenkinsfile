@@ -26,7 +26,7 @@ pipeline {
       }
     }
 
-    stage("Unit Tests") {
+    stage("Sonarqube") {
       steps{
         withSonarQubeEnv('sonar-scanner') {
           sh "mvn sonar:sonar"
