@@ -9,6 +9,8 @@ pipeline {
     DOCKERHUB_CREDENTIALS = 'docker_token'
     DOCKER_REPOSITORY = 'fedimersni/java-end-to-end-pipeline'
     MAVEN_SETINGS_CONFIG = 'global-maven'
+    JENKINS_API_TOKEN = credentials('JENKINS_API_TOKEN')
+    CD_PIPELINE_TOKEN = "gitops-token"
   }
   stages {
     stage('Git checkout') {
@@ -69,6 +71,13 @@ pipeline {
             sh 'docker push $DOCKER_REPOSITORY:$IMAGE_TAG'
             sh 'docker push $DOCKER_REPOSITORY:latest'
           }
+        }
+      }
+    }
+    stage("Trigger CD Pipeline") {
+      steps {
+        script {
+            sh "curl -v -k --user fedimersni:${JENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'http://jenkins:8080/job/java-CD-pipeline/buildWithParameters?token=${env.CD_PIPELINE_TOKEN}'"
         }
       }
     }
